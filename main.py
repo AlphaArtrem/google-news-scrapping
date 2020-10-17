@@ -8,8 +8,10 @@ import os
 
 # Search scrapper
 def google_search():
+    print("call")
     # Current woking directory
     current_path = os.getcwd()
+    print(current_path)
     # List of queries
     es_entities = [
         "Nba",
@@ -97,4 +99,4 @@ def google_search():
 # Fire search scrapper every 10 mins or 60*10 seconds
 while True:
     google_search()
-    time.sleep(60 * 10)
+    time.sleep(60 * 2)
