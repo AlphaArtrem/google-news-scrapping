@@ -6,26 +6,35 @@ import csv
 from pathlib import Path
 import os
 
+
+def telegram_bot_sendtext(bot_message):
+    bot_token = ''
+    bot_chatID = '1283355929'
+    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+
+    response = requests.get(send_text)
+
+    return response.json()
+
 # Search scrapper
 def google_search():
-    print("call")
     # Current woking directory
     current_path = os.getcwd()
     print(current_path)
     # List of queries
     es_entities = [
-        "Nba",
+        "NBA",
         "UFC",
-        "Mma",
+        "MMA",
         "Boxing",
         "Tennis",
         "F1",
-        "Nfl",
+        "NFL",
         "Nascar",
-        "Wwe",
+        "WWE",
         "Fortnite",
         "Call of duty",
-        "Ps5",
+        "PS5",
         "Xbox",
         "Animal Crossing",
         "Apex legends",
@@ -78,12 +87,15 @@ def google_search():
                     if len(existing_csv_rows) >= 3:
                         if g.text != existing_csv_rows[0][1] and g.text != existing_csv_rows[1][1] and g.text != existing_csv_rows[2][1]:
                             results.append([time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text])
+                            telegram_bot_sendtext("entity : " + query + ", timestamp : " + time.strftime("%Y-%m-%d %H:%M:%S", ts) + ", keyword : " +  g.text)
                     elif len(existing_csv_rows) == 2:
                         if g.text != existing_csv_rows[0][1] and g.text != existing_csv_rows[1][1]:
                             results.append([time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text])
+                            telegram_bot_sendtext("entity : " + query + ", timestamp : " + time.strftime("%Y-%m-%d %H:%M:%S", ts) + ", keyword : " +  g.text)
                     elif len(existing_csv_rows) == 1:
                         if g.text != existing_csv_rows[0][1]:
                             results.append([time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text])
+                            telegram_bot_sendtext("entity : " + query + ", timestamp : " + time.strftime("%Y-%m-%d %H:%M:%S", ts) + ", keyword : " +  g.text)
             # If csv file did exist add its data    
             if len(existing_csv_rows) > 0:
                 results.extend(existing_csv_rows)
