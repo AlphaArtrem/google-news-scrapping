@@ -1,1 +1,5 @@
 cred.json
+*.pem
+secrets.txt
+*.html
+__pycache__
