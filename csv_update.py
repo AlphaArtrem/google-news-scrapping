@@ -1,4 +1,6 @@
 import time
+from datetime import datetime
+from pytz import timezone
 import csv
 from pathlib import Path
 import os
@@ -67,7 +69,9 @@ def keywords_csv_update(resp, query):
     # Parse data from google as html
     soup = BeautifulSoup(resp.content, "html.parser")
     # Get time stamp
-    ts = time.gmtime()
+    now_utc = datetime.now(timezone('UTC'))
+    now_asia = now_utc.astimezone(timezone('Asia/Kolkata'))
+    ts = now_asia.strftime("%Y-%m-%d %H:%M:%S %Z%z")
     # Find divs with class Vouh6c as it is used for people also searched sections
     for g in soup.find_all('div', class_ = 'Vouh6c'):
         new_keyword = []
@@ -77,13 +81,13 @@ def keywords_csv_update(resp, query):
         else:
             if len(existing_csv_rows) >= 3:
                 if g.text != existing_csv_rows[0][1] and g.text != existing_csv_rows[1][1] and g.text != existing_csv_rows[2][1]:
-                   new_keyword = [time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text]
+                   new_keyword = [ts, g.text]
             elif len(existing_csv_rows) == 2:
                 if g.text != existing_csv_rows[0][1] and g.text != existing_csv_rows[1][1]:
-                    new_keyword = [time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text]
+                    new_keyword = [ts, g.text]
             elif len(existing_csv_rows) == 1:
                 if g.text != existing_csv_rows[0][1]:
-                    new_keyword = [time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text]
+                    new_keyword = [ts, g.text]
         if new_keyword != []:
             results.append(new_keyword)
             telegram_updates(query, new_keyword[0], new_keyword[1])

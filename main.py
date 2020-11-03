@@ -28,6 +28,6 @@ def google_search():
         time.sleep(20)
 
 if __name__=="__main__": 
-    #google_search()
+    google_search()
     redshift_update()
     
