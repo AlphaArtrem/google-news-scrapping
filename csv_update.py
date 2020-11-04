@@ -21,8 +21,11 @@ def articles_csv_update(resp, query, new_keywords):
     for g in soup.find_all('div', class_ = 'dbsr'):
         links = g.findAll('a')
         for a in links:
-            text = a.find_all('div', class_ = "yr3B8d KWQBje")[0].find_all('div', class_ = "hI5pFf")[0].find_all('div', class_ = "JheGif jBgGLd")[0].text
-            all_articles.append([a['href'], text])
+            try:
+                text = a.find_all('div', class_ = "yr3B8d KWQBje")[0].find_all('div', class_ = "hI5pFf")[0].find_all('div', class_ = "JheGif jBgGLd")[0].text
+                all_articles.append([a['href'], text])
+            except:
+                return
     results = []
     current_index = 0
     for keyword in new_keywords:
@@ -77,17 +80,21 @@ def keywords_csv_update(resp, query):
         new_keyword = []
         # If new csv file add result else only add if the result was not found in last 3 records
         if len(existing_csv_rows) == 0:
-            new_keyword = [time.strftime("%Y-%m-%d %H:%M:%S", ts), g.text]
+            new_keyword = [ts, g.text]
         else:
-            if len(existing_csv_rows) >= 3:
-                if g.text != existing_csv_rows[0][1] and g.text != existing_csv_rows[1][1] and g.text != existing_csv_rows[2][1]:
-                   new_keyword = [ts, g.text]
-            elif len(existing_csv_rows) == 2:
-                if g.text != existing_csv_rows[0][1] and g.text != existing_csv_rows[1][1]:
-                    new_keyword = [ts, g.text]
-            elif len(existing_csv_rows) == 1:
-                if g.text != existing_csv_rows[0][1]:
-                    new_keyword = [ts, g.text]
+            found_last_six = False
+            if len(existing_csv_rows) >= 6:
+                for row in existing_csv_rows[0:6]:
+                    if row[1] == g.text:
+                        found_last_six = True
+                        break
+            else:
+                for row in existing_csv_rows[0:len(existing_csv_rows)]:
+                    if row[1] == g.text:
+                        found_last_six = True
+                        break
+            if not found_last_six:
+                new_keyword = [ts, g.text]             
         if new_keyword != []:
             results.append(new_keyword)
             telegram_updates(query, new_keyword[0], new_keyword[1])

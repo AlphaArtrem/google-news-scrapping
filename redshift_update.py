@@ -9,6 +9,8 @@ from sqlalchemy import create_engine
 import pandas as pd
 import json
 from static import es_entities
+import psycopg2
+
 
 cred_file = open("cred.json",)
 creds = json.load(cred_file)
@@ -48,6 +50,10 @@ def redshift_update():
                         })
                 csvfile.close() 
     df = pd.DataFrame(data)
-    conn = create_engine(f'postgresql://{redshift_creds["username"]}:{redshift_creds["password"]}@{redshift_creds["url"]}/{redshift_creds["database"]}')
+    conn = create_engine(f'postgresql://{redshift_creds["username"]}:{redshift_creds["password"]}@{redshift_creds["host"]}:{redshift_creds["port"]}/{redshift_creds["database"]}')
     df.to_sql('esanalytics_google', conn, index=False, if_exists='replace')
 
+con=psycopg2.connect(dbname= redshift_creds["database"], host=redshift_creds["host"], 
+port= redshift_creds["port"], user= redshift_creds["username"], password= redshift_creds["password"])
+cur = con.cursor()
+cur.execute("""DROP TABLE esanalytics""")
