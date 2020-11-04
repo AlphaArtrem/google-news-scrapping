@@ -16,7 +16,25 @@ cred_file = open("cred.json",)
 creds = json.load(cred_file)
 cred_file.close()
 redshift_creds = creds["redshift"]
+con=psycopg2.connect(dbname= redshift_creds["database"], host=redshift_creds["host"], 
+port= redshift_creds["port"], user= redshift_creds["username"], password= redshift_creds["password"])
+cur = con.cursor()
 
+
+cur.execute("""CREATE TABLE esanalytics_keyword_trends(
+    ID INT IDENTITY(1,1),
+    TIMESTAMP_IST VARCHAR (30) NOT NULL,
+    TIMESTAMP_ADDED DATETIME DEFAULT CURRENT_TIMESTAMP, 
+    ENTITY VARCHAR (255) NOT NULL,
+    KEYWORD VARCHAR (255) NOT NULL,
+    ARTICLE_TITLE_1 VARCHAR (1000) NOT NULL,  
+    ARTICLE_URL_1 VARCHAR (1000) NOT NULL, 
+    ARTICLE_TITLE_2 VARCHAR (1000) NOT NULL,  
+    ARTICLE_URL_2 VARCHAR (1000) NOT NULL, 
+    ARTICLE_TITLE_3 VARCHAR (1000) NOT NULL,  
+    ARTICLE_URL_3 VARCHAR (1000) NOT NULL, 
+    PRIMARY KEY (ID)
+)""")
 # Current woking directory
 current_path = os.getcwd()
 data = []
@@ -49,10 +67,7 @@ for query in es_entities[0:1]:
             csvfile.close() 
 df = pd.DataFrame(data)
 conn = create_engine(f'postgresql://{redshift_creds["username"]}:{redshift_creds["password"]}@{redshift_creds["host"]}:{redshift_creds["port"]}/{redshift_creds["database"]}')
-df.to_sql('esanalytics_keyword_trends', conn, index=False, if_exists='replace')
-con=psycopg2.connect(dbname= redshift_creds["database"], host=redshift_creds["host"], 
-port= redshift_creds["port"], user= redshift_creds["username"], password= redshift_creds["password"])
-cur = con.cursor()
+df.to_sql('esanalytics_keyword_trends', conn, index=False, if_exists='append')
 cur.execute("SELECT * FROM esanalytics_keyword_trends")
 print(cur.fetchall())
 cur.close() 
