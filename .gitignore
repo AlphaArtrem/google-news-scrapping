@@ -3,3 +3,4 @@ cred.json
 secrets.txt
 *.html
 __pycache__
+*.sql

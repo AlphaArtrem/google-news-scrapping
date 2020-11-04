@@ -56,4 +56,21 @@ def redshift_update():
 con=psycopg2.connect(dbname= redshift_creds["database"], host=redshift_creds["host"], 
 port= redshift_creds["port"], user= redshift_creds["username"], password= redshift_creds["password"])
 cur = con.cursor()
-cur.execute("""DROP TABLE esanalytics""")
+current_path = os.getcwd()
+existing_csv_path = Path(current_path + f"/csv/NBATopArticles.csv")
+data = ()
+if existing_csv_path.exists() :
+    with open(current_path + f"/csv/NBATopArticles.csv", 'r', newline = '') as csvfile: 
+        csvreader = csv.reader(csvfile) 
+        # Ignore csv headers
+        fields = next(csvreader)
+        # Read each row
+        for row in csvreader: 
+            # Only append a row if it is not empty as csv writer makes last row empty
+            if row != []:
+                data.append(tuple(row))
+        csvfile.close() 
+    args_str = ','.join(cur.mogrify("(%s,%s,%s,%s,%s,%s,%s,%s,%s)", x) for x in data)
+    cur.execut("""INSERT INTO esanalytics
+    (ENTITY, TIMESTAMP_IST,KEYWORD,ARTICLE_URL_1, ARTICLE_TITLE_1,ARTICLE_URL_2, ARTICLE_TITLE_2,ARTICLE_URL_3, ARTICLE_TITLE_3)
+    VALUES """ + args_str)
