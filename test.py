@@ -11,7 +11,6 @@ import json
 from static import es_entities
 import psycopg2
 
-
 cred_file = open("cred.json",)
 creds = json.load(cred_file)
 cred_file.close()
@@ -19,8 +18,6 @@ redshift_creds = creds["redshift"]
 con=psycopg2.connect(dbname= redshift_creds["database"], host=redshift_creds["host"], 
 port= redshift_creds["port"], user= redshift_creds["username"], password= redshift_creds["password"])
 cur = con.cursor()
-
-
 cur.execute("""CREATE TABLE esanalytics_keyword_trends(
     ID INT IDENTITY(1,1),
     TIMESTAMP_IST VARCHAR (30) NOT NULL,
@@ -53,21 +50,21 @@ for query in es_entities[0:1]:
             for row in csvreader: 
                 # Only append a row if it is not empty as csv writer makes last row empty
                 if row != []:
-                    data.append({
-                        'TIMESTAMP_IST' : row[0],
-                        'ENTITY' : row[1],
-                        'KEYWORD': row[2],
-                        'ARTICLE_URL_1' : row[3],
-                        'ARTICLE_TITLE_1' : row[4],
-                        'ARTICLE_URL_2': row[5],
-                        'ARTICLE_TITLE_3' : row[6],
-                        'ARTICLE_URL_3' : row[7],
-                        'ARTICLE_TITLE_3': row[8],
-                    })
+                    data.append((
+                        row[0],
+                        row[1],
+                        row[2],
+                        row[3],
+                        ''.join(e for e in str(row[4]) if e.isalnum() or e == ' '),
+                        row[5],
+                        ''.join(e for e in str(row[6]) if e.isalnum() or e == ' '),
+                        row[7],
+                        ''.join(e for e in str(row[8]) if e.isalnum() or e == ' '),
+                        ))
             csvfile.close() 
-df = pd.DataFrame(data)
-conn = create_engine(f'postgresql://{redshift_creds["username"]}:{redshift_creds["password"]}@{redshift_creds["host"]}:{redshift_creds["port"]}/{redshift_creds["database"]}')
-df.to_sql('esanalytics_keyword_trends', conn, index=False, if_exists='append')
+cur.execute("""INSERT INTO esanalytics
+(ENTITY, TIMESTAMP_IST,KEYWORD,ARTICLE_URL_1, ARTICLE_TITLE_1,ARTICLE_URL_2, ARTICLE_TITLE_2,ARTICLE_URL_3, ARTICLE_TITLE_3)
+VALUES """ + tuple(data))
 cur.execute("SELECT * FROM esanalytics_keyword_trends")
 print(cur.fetchall())
 cur.close() 
