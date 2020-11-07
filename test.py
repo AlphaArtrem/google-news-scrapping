@@ -4,6 +4,7 @@ import os
 import json
 from static import es_entities
 import psycopg2
+from telegram_update import telegram_updates
 
 cred_file = open("cred.json",)
 creds = json.load(cred_file)
@@ -28,13 +29,18 @@ for query in es_entities[0:1]:
             for row in csvreader: 
                 # Only append a row if it is not empty as csv writer makes last row empty
                 if row != []:
-                    traversed_ketwords.append(row[2])
-                    count = 0
-                    still_trending = True
-                    while still_trending and count < 25:
+                    count = 1
+                    while count < 25 and row[2] not in traversed_ketwords:
                         cur.execute(f"""SELECT COUNT(*) FROM esanalytics_keyword_trends 
-                        WHERE TIMESTAMP_ADDED > dateadd(hour, {-1 * count}, sysdate) AND KEYWORD = {row[2]}""")
-                        print(cur.fetchaall()[0][0])
+                        WHERE TIMESTAMP_ADDED > dateadd(hour, {-1 * count}, sysdate) 
+                        AND KEYWORD = '{''.join(e for e in str(row[2]) if e.isalnum() or e == ' ')}'""")
+                        if cur.fetchall()[0][0] >= (4 * count):
+                            count = count + 1
+                        else:
+                            break
+                    if count > 1:
+                        telegram_updates(row[0], row[1], row[2], count - 1)
+                    traversed_ketwords.append(row[2])
             csvfile.close()
 cur.close() 
 con.close()

@@ -44,7 +44,10 @@ def get_user_subs():
     return user_subs
 
 # Search scrapper
-def telegram_updates(query, ts, keyword):
+def telegram_updates(query, ts, keyword, trending = 0):
     user_subs = get_user_subs()
     for user in user_subs[query]:
-        telegram_bot_sendtext("entity : " + query + "\ntimestamp : " + ts + "\nkeyword : " +  keyword, user)
+        if trending > 0:
+            telegram_bot_sendtext(f"keyword : {keyword} for entity : {query} has been trending for {trending} hours", user)
+        else:
+            telegram_bot_sendtext("entity : " + query + "\ntimestamp : " + ts + "\nkeyword : " +  keyword, user)
