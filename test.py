@@ -42,9 +42,10 @@ for query in es_entities[0:1]:
                         ''.join(e for e in str(row[8]) if e.isalnum() or e == ' '),
                         ))
             csvfile.close() 
-cur.execute("""INSERT INTO esanalytics_keyword_trends
+args = ','.join(str(x) for x in data)
+cur.execute(f"""INSERT INTO esanalytics_keyword_trends
 (ENTITY, TIMESTAMP_IST,KEYWORD,ARTICLE_URL_1, ARTICLE_TITLE_1,ARTICLE_URL_2, ARTICLE_TITLE_2,ARTICLE_URL_3, ARTICLE_TITLE_3)
-VALUES """ + tuple(data))
+VALUES {args}""")
 con.commit()
 cur.close() 
 con.close()
