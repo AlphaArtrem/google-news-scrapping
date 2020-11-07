@@ -18,9 +18,7 @@ def redshift_update():
     # Current woking directory
     current_path = os.getcwd()
     data = []
-    # Field for csv files
-    fields = []
-    for query in es_entities[0:1]:
+    for query in es_entities:
         # Remove spaces from queries
         query = query.replace(' ', '+')
         existing_csv_path = Path(current_path + f"/csv/{query}TopArticles.csv")
