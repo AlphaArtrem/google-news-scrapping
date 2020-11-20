@@ -17,13 +17,14 @@ cred_file.close()
 telegram_creds = creds["telegram"]
 
 def telegram_bot_sendtext(bot_message, messageID, bot):
-    bot_token = telegram_creds[bot]
-    bot_chatID = messageID
-    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+    if bot in telegram_creds.keys():
+        bot_token = telegram_creds[bot]
+        bot_chatID = messageID
+        send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
 
-    response = requests.get(send_text)
+        response = requests.get(send_text)
 
-    return response.json()
+        return response.json()
 
 def get_user_subs(csvName):
     user_subs = {}
