@@ -65,7 +65,7 @@ def telegram_updates(query, ts, keyword, trending = 0):
 def telegram_top_updates(query, top_keywords):
     user_subs = get_user_subs("SuperUsers")
     specific_users = get_user_subs("SpecificUsers")
-    message = "Top keywords for today :"
+    message = f"Top keywords for today for {query}:"
     for keyword in top_keywords:
         message = message + "\n" + keyword[1] + " found " + keyword[0] + " times"
     if query in user_subs.keys():
