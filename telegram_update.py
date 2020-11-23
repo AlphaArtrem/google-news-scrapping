@@ -60,3 +60,17 @@ def telegram_updates(query, ts, keyword, trending = 0):
                 telegram_bot_sendtext(f"keyword : {keyword} for entity : {query} has been trending for {trending} hours", user, query)
             else:
                 telegram_bot_sendtext("entity : " + query + "\ntimestamp : " + ts + "\nkeyword : " +  keyword, user, query)
+
+                
+def telegram_top_updates(query, top_keywords):
+    user_subs = get_user_subs("SuperUsers")
+    specific_users = get_user_subs("SpecificUsers")
+    message = "Top keywords for today :"
+    for keyword in top_keywords:
+        message = message + "\n" + keyword[1] + " found " + keyword[0] + " times"
+    if query in user_subs.keys():
+        for user in user_subs[query]:
+            telegram_bot_sendtext(message, user, "super")
+    if query in specific_users.keys():
+        for user in specific_users[query]:
+            telegram_bot_sendtext(message, user, query)
